@@ -1,21 +1,25 @@
 
 
 library(dplyr)
+
+### Load list of municipalities and re-encode due to cross-platform encoding weirdness
 municipalities <- readRDS("municipalities.rds")
-
-
+for(i in 1:length(municipalities)) {
+  Encoding(municipalities[[i]]) <- "latin1" 
+}
 
 ### Download files
 muniList <- data.frame("name" = names(municipalities)[-1], stringsAsFactors = F)
 muniList <- arrange(muniList, name)
-muniList <- mutate(muniList, code = c("10", "20", "21", "09", "13", "23", "06", "08", "07", "25", "12",
+muniList <- mutate(muniList, code = c("10", "20", "09", "21", "13", "23", "06", "08", "07", "25", "12",
                                       "01", "04", "03", "17", "24", "22", "19", "14", "18", "05"))
 for(i in 1:nrow(muniList)) {
         download.file(url = paste("http://geodpags.skogsstyrelsen.se/geodataport/data/sksAvverkAnm",
                                   muniList$code[i], ".zip", sep = ""),
                       destfile = paste("temp/zip/", muniList$name[i], ".zip", sep = ""))
 }
-
+Sys.Date() %>%
+        write.table(file = "date.txt")
 
 ### Unzip
 toZip <- list.files("temp/zip", full.names = T)
@@ -29,7 +33,7 @@ for(i in 1:length(toZip)) {
 }
 
 ### Rename files
-i <- 1
+
 for(i in 1:nrow(extr)) {
         file.rename(from = dir(extr$path[i], full.names = T),
                     to = gsub("sksAvverkAnm\\d*", extr$dir[i], list.files(extr$path[i], full.names = T)))
@@ -47,4 +51,4 @@ for(i in 1:nrow(extr)) {
                 file.remove(list.files(., full.names = T))
 }
 file.remove(list.files("temp/zip", full.names = T))
-unlink(list.files("temp/zip"), recursive=TRUE, force = T)
+
