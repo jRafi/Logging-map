@@ -5,8 +5,8 @@ library(leaflet)
 library(shiny)
 library(shinydashboard)
 library(rgdal)
-municipalities <- readRDS("Git Local/Skogsavverkning/municipalities.rds")
-dataDate <- read.table("Git Local/Skogsavverkning/date.txt", stringsAsFactors = F)
+municipalities <- readRDS("municipalities.rds")
+dataDate <- read.table("date.txt", stringsAsFactors = F)
 
 
 shinyApp(
