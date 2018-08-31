@@ -5,74 +5,79 @@ library(leaflet)
 library(shiny)
 library(shinydashboard)
 library(rgdal)
-municipalities <- readRDS("municipalities.rds")
-DataDate <- read.table("date.txt", stringsAsFactors = F)
+municipalities <- readRDS("Git Local/Skogsavverkning/municipalities.rds")
+dataDate <- read.table("Git Local/Skogsavverkning/date.txt", stringsAsFactors = F)
 
 
 shinyApp(
         ui <- dashboardPage(
-                skin = "green",
                 dashboardHeader(
                         title = "Skogsavverkning"),
                 dashboardSidebar(
-                        paste("Data senast hämtad: ", DataDate, "", sep = ""),
                         selectInput("county",
                                     label = h3("1. Välj län"),
                                     choices = names(municipalities),
-                                    selected = ("")
-                        ),
-                        conditionalPanel(condition = "input.county != ' '",
-                                         uiOutput("municipalityOutput")
-                        ),
-                        conditionalPanel(condition = "input.munies != ' '",
-                                         uiOutput("yearsSlider"))
-                        ),
-                dashboardBody( mainPanel(
-                        leafletOutput(outputId = "map")
-                ))
-        ),
-        
-        
-        server = function(input, output) {
-                
-                # Conditional UI-panel 1
-                output$municipalityOutput <- renderUI({
-                        selectInput("munies",
-                                    label = h3("2. Välj kommun"),
-                                    municipalities[[input$county]],
-                                    selected = "")
-                })
-                
-                # Conditional UI-panel 2
-                output$yearsSlider <- renderUI({
+                                    selected = ""),
+                        uiOutput("ui_muni"),
+                        #selectInput("list",
+                        #            label = h3("2. Välj kommun"),
+                        #            c(municipalities[[input$county()]]),
+                        #            selected = "---"),
+                        #selectInput("list", "Lista", c("Gotland", "---"), selected = "Gotland"),
                         sliderInput("years",
                                     label = h3("3. Välj tidsperiod"),
                                     min = 1998, 
-                                    #max = as.numeric(format(Sys.Date(), "%Y")),
-                                    max = 2018,
+                                    max = as.numeric(format(Sys.Date(), "%Y")),
                                     value = c(2017,2018),
                                     sep = "",
                                     width = "90%",
                                     ticks = F
                         )
+                ),
+                dashboardBody(mainPanel(
+                        fluidRow(
+                                valueBoxOutput("progressBox"),
+                                verbatimTextOutput("munies"),
+                                leafletOutput(outputId = "map")
+                        )))),
+        
+        server = function(input, output) {
+                
+                output$ui_muni <- renderUI({
+                        selectInput("munies",
+                                    label = h3("2. Välj kommun"),
+                                    choices = municipalities[[input$county]],
+                                    selected = "")
                 })
                 
-                # Select data
-                dataInput <- reactive({
-                        dataInput <- readOGR(dsn = paste("Git Local/Skogsavverkning/data/Municipalities/", input$muni, sep = ""),
-                                             layer = input$list)
-                        dataInput@data <- mutate(dataInput@data, year = as.numeric(levels(year))[dataInput@data$year])
-                        dataInput
+                dataInput <- eventReactive(input$munies, {
+                        if(dir.exists(paste("Git Local/Skogsavverkning/data/Municipalities/", input$munies, sep = ""))) {
+                                readOGR(dsn = paste("Git Local/Skogsavverkning/data/Municipalities/", input$munies, sep = ""),
+                                        layer = input$munies)
+                        }
                 })
                 
                 
-                # Select years
-                dataSelect <- reactive({
-                        dataSel <- dataInput()
-                        dataSel <- dataSel[dataSel$year >= input$years[1] & dataSel$year <= input$years[2],]
-                        dataSel
+                #, verbose = F)
+                #dataInput@data <<- mutate(dataInput@data, year = as.numeric(levels(year))[dataInput@data$year])
+                #dataInput
+                
+                
+                dataSel <- reactive({
+                        if(dir.exists(paste("Git Local/Skogsavverkning/data/Municipalities/", input$munies, sep = ""))) {
+                                dataSel <- dataInput()
+                                dataSel@data <- mutate(dataSel@data, year = as.numeric(levels(year))[dataSel@data$year])
+                                dataSel <- dataSel[dataSel$year >= input$years[1] & dataSel$year <= input$years[2],]
+                                dataSel
+                        }
                 })
                 
+                popups <- reactive({
+                        if(dir.exists(paste("Git Local/Skogsavverkning/data/Municipalities/", input$munies, sep = ""))) {
+                                popups <- dataInput()
+                                popups <- popups@data
+                        }
+                })
                 
                 # Leaflet map
                 output$map <- renderLeaflet({
@@ -82,12 +87,17 @@ shinyApp(
                 })
                 
                 observe({
-                        leafletProxy("map", data = dataSelect()) %>%
-                                clearShapes() %>%
-                                addPolygons()
+                        if(dir.exists(paste("Git Local/Skogsavverkning/data/Municipalities/", input$munies, sep = ""))) {
+                                leafletProxy("map", data = dataSel()) %>%
+                                        clearShapes() %>%
+                                        addPolygons(layerId = ~id)
+                        }
                 })
-
-
+                
+                output$progressBox <- renderPrint({
+                        filter(popups(), id == input$map_shape_click)
+                })
+                
                 
         },
         options = list(height = 600)
