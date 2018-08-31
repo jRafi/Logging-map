@@ -1,4 +1,9 @@
 
+tags$style(type="text/css",
+           ".shiny-output-error { visibility: hidden; }",
+           ".shiny-output-error:before { visibility: hidden; }"
+)
+
 # Dependencies
 library(dplyr)
 library(leaflet)
@@ -12,18 +17,13 @@ dataDate <- read.table("date.txt", stringsAsFactors = F)
 shinyApp(
         ui <- dashboardPage(
                 dashboardHeader(
-                        title = "Skogsavverkning"),
+                        title = "Skogskoll.se"),
                 dashboardSidebar(
                         selectInput("county",
                                     label = h3("1. Välj län"),
                                     choices = names(municipalities),
                                     selected = ""),
                         uiOutput("ui_muni"),
-                        #selectInput("list",
-                        #            label = h3("2. Välj kommun"),
-                        #            c(municipalities[[input$county()]]),
-                        #            selected = "---"),
-                        #selectInput("list", "Lista", c("Gotland", "---"), selected = "Gotland"),
                         sliderInput("years",
                                     label = h3("3. Välj tidsperiod"),
                                     min = 1998, 
@@ -36,8 +36,6 @@ shinyApp(
                 ),
                 dashboardBody(mainPanel(
                         fluidRow(
-                                valueBoxOutput("progressBox"),
-                                verbatimTextOutput("munies"),
                                 leafletOutput(outputId = "map")
                         )))),
         
@@ -51,20 +49,14 @@ shinyApp(
                 })
                 
                 dataInput <- eventReactive(input$munies, {
-                        if(dir.exists(paste("Git Local/Skogsavverkning/data/Municipalities/", input$munies, sep = ""))) {
-                                readOGR(dsn = paste("Git Local/Skogsavverkning/data/Municipalities/", input$munies, sep = ""),
-                                        layer = input$munies)
+                        if(dir.exists(paste("data/Municipalities/", input$munies, sep = ""))) {
+                                readOGR(dsn = paste("data/Municipalities/", input$munies, sep = ""),
+                                        layer = input$munies, verbose = F)
                         }
                 })
                 
-                
-                #, verbose = F)
-                #dataInput@data <<- mutate(dataInput@data, year = as.numeric(levels(year))[dataInput@data$year])
-                #dataInput
-                
-                
                 dataSel <- reactive({
-                        if(dir.exists(paste("Git Local/Skogsavverkning/data/Municipalities/", input$munies, sep = ""))) {
+                        if(dir.exists(paste("data/Municipalities/", input$munies, sep = ""))) {
                                 dataSel <- dataInput()
                                 dataSel@data <- mutate(dataSel@data, year = as.numeric(levels(year))[dataSel@data$year])
                                 dataSel <- dataSel[dataSel$year >= input$years[1] & dataSel$year <= input$years[2],]
@@ -73,7 +65,7 @@ shinyApp(
                 })
                 
                 popups <- reactive({
-                        if(dir.exists(paste("Git Local/Skogsavverkning/data/Municipalities/", input$munies, sep = ""))) {
+                        if(dir.exists(paste("data/Municipalities/", input$munies, sep = ""))) {
                                 popups <- dataInput()
                                 popups <- popups@data
                         }
@@ -87,16 +79,16 @@ shinyApp(
                 })
                 
                 observe({
-                        if(dir.exists(paste("Git Local/Skogsavverkning/data/Municipalities/", input$munies, sep = ""))) {
+                        if(dir.exists(paste("data/Municipalities/", input$munies, sep = ""))) {
                                 leafletProxy("map", data = dataSel()) %>%
                                         clearShapes() %>%
                                         addPolygons(layerId = ~id)
                         }
                 })
                 
-                output$progressBox <- renderPrint({
-                        filter(popups(), id == input$map_shape_click)
-                })
+                #output$progressBox <- renderPrint({
+                #        filter(popups(), id == input$map_shape_click)
+                #})
                 
                 
         },
