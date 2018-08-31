@@ -3,30 +3,33 @@
 library(dplyr)
 library(leaflet)
 library(shiny)
+library(shinydashboard)
 library(rgdal)
 municipalities <- readRDS("municipalities.rds")
+DataDate <- read.table("date.txt", stringsAsFactors = F)
 
 
 shinyApp(
-        ui = fluidPage(
-                titlePanel("Avverkningsanmälningar"),
-                sidebarLayout(
-                        sidebarPanel(
-                                selectInput("county",
-                                            label = h3("1. Välj län"),
-                                            choices = names(municipalities),
-                                            selected = ("")
-                                ),
-                                conditionalPanel(condition = "input.county != ' '",
-                                                 uiOutput("municipalityOutput")
-                                ),
-                                conditionalPanel(condition = "input.munies != ' '",
-                                                 uiOutput("yearsSlider"))
+        ui <- dashboardPage(
+                skin = "green",
+                dashboardHeader(
+                        title = "Skogsavverkning"),
+                dashboardSidebar(
+                        paste("Data senast hämtad: ", DataDate, "", sep = ""),
+                        selectInput("county",
+                                    label = h3("1. Välj län"),
+                                    choices = names(municipalities),
+                                    selected = ("")
                         ),
-                        mainPanel(
-                                leafletOutput(outputId = "map")
-                        )
-                )
+                        conditionalPanel(condition = "input.county != ' '",
+                                         uiOutput("municipalityOutput")
+                        ),
+                        conditionalPanel(condition = "input.munies != ' '",
+                                         uiOutput("yearsSlider"))
+                        ),
+                dashboardBody( mainPanel(
+                        leafletOutput(outputId = "map")
+                ))
         ),
         
         
@@ -54,34 +57,37 @@ shinyApp(
                         )
                 })
                 
-                # Reactive module 2
-                dataSelected <- reactive({
-                        dataInput <- readOGR(dsn = paste("data/Municipalities/", input$munies, sep = ""),
-                                             layer = input$munies)#, verbose = F)
-                        #dataInput$year <- as.numeric(dataInput$year) #levels(dataInput$year))[dataInput$year]
+                # Select data
+                dataInput <- reactive({
+                        dataInput <- readOGR(dsn = paste("Git Local/Skogsavverkning/data/Municipalities/", input$muni, sep = ""),
+                                             layer = input$list)
                         dataInput@data <- mutate(dataInput@data, year = as.numeric(levels(year))[dataInput@data$year])
                         dataInput
                 })
                 
                 
-                # Reactive module 3
-                dataSel3 <- reactive({
-                        dataYears <- dataSelected()
-                        dataYears <- dataYears[dataYears$year >= input$years[1] & dataYears$year <= input$years[2],]
-                        #dataYears@data <- filter(dataYears@data, year >= input$years[1])
-                        #dataYears@data <- mutate(dataYears@data, year = as.numeric(levels(year))[dataYears@data$year])
-                        dataYears
+                # Select years
+                dataSelect <- reactive({
+                        dataSel <- dataInput()
+                        dataSel <- dataSel[dataSel$year >= input$years[1] & dataSel$year <= input$years[2],]
+                        dataSel
                 })
                 
                 
                 # Leaflet map
                 output$map <- renderLeaflet({
                         leaflet() %>% 
-                                addProviderTiles("CartoDB.Positron") %>%
-                                fitBounds(10, 69, 24, 55) %>% 
-                                addPolygons(data = dataSel3())
-                        
+                                addTiles() %>%
+                                fitBounds(10, 69, 24, 55)
                 })
+                
+                observe({
+                        leafletProxy("map", data = dataSelect()) %>%
+                                clearShapes() %>%
+                                addPolygons()
+                })
+
+
                 
         },
         options = list(height = 600)
