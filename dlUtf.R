@@ -1,16 +1,16 @@
 library(sf)
 library(dplyr)
 
-if(isTRUE(Sys.info()['sysname'] == "Windows")) {
-        setwd("~/R WD/Git Local/skogskoll")
-} else if(isTRUE(Sys.info()['sysname'] == "Ubuntu")) {
-        setwd("../srv/shiny-server/")
-}
-
 download.file(url = "http://geodpags.skogsstyrelsen.se/geodataport/data/sksUtfordAvverk.zip",
               destfile = "temp/utf/utf.zip")
 unzip("temp/utf/utf.zip", exdir = "temp/utf")
-utf <- read_sf("temp/utf/sksUtfordAvverk.shp", options = "ENCODING=latin1")
+
+if(isTRUE(Sys.info()['sysname'] == "Windows")) {
+        utf <- read_sf("temp/anm/sksUtfordAvverk.shp", options = "ENCODING=latin1")
+} else{
+        utf <- read_sf("temp/anm/sksUtfordAvverk.shp")
+}
+
 utf <- select(utf, -Lannr, -Kommunnr)
 
 if(isTRUE(Sys.info()['sysname'] == "Windows")) {
