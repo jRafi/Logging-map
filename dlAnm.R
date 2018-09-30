@@ -3,14 +3,20 @@ library(dplyr)
 
 if(isTRUE(Sys.info()['sysname'] == "Windows")) {
         setwd("~/R WD/Git Local/skogskoll")
-} else if(isTRUE(Sys.info()['sysname'] == "Ubuntu")) {
+} else{
         setwd("../srv/shiny-server/")
 }
 
 download.file(url = "http://geodpags.skogsstyrelsen.se/geodataport/data/sksAvverkAnm.zip",
               destfile = "temp/anm/anm.zip")
 unzip("temp/anm/anm.zip", exdir = "temp/anm")
-anm <- read_sf("temp/anm/sksAvverkAnm.shp", options = "ENCODING=latin1")
+
+if(isTRUE(Sys.info()['sysname'] == "Windows")) {
+        anm <- read_sf("temp/anm/sksAvverkAnm.shp", options = "ENCODING=latin1")
+} else{
+        anm <- read_sf("temp/anm/sksAvverkAnm.shp")
+}
+
 anm <- select(anm, -Lannr, -Kommunnr)
 
 if(isTRUE(Sys.info()['sysname'] == "Windows")) {
