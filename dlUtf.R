@@ -6,9 +6,9 @@ download.file(url = "http://geodpags.skogsstyrelsen.se/geodataport/data/sksUtfor
 unzip("temp/utf/utf.zip", exdir = "temp/utf")
 
 if(isTRUE(Sys.info()['sysname'] == "Windows")) {
-        utf <- read_sf("temp/anm/sksUtfordAvverk.shp", options = "ENCODING=latin1")
+        utf <- read_sf("temp/utf/sksUtfordAvverk.shp", options = "ENCODING=latin1")
 } else{
-        utf <- read_sf("temp/anm/sksUtfordAvverk.shp")
+        utf <- read_sf("temp/utf/sksUtfordAvverk.shp")
 }
 
 utf <- select(utf, -Lannr, -Kommunnr)
