@@ -11,7 +11,9 @@ municipalities <- readRDS("municipalities.rds")
 
 # Check which date the data is from
 date <- read.table("date.txt", stringsAsFactors = F)
-hej <- readRDS("Senaste_x.rds")
+
+# For use with some lazy coding
+senaste <- readRDS("Senaste_x.rds")
 
 shinyApp(
         ui <- dashboardPage(
@@ -63,7 +65,7 @@ shinyApp(
                 })
                 
                 output$ui_years <- renderUI({
-                        if(!input$munies %in% hej){
+                        if(!input$munies %in% senaste){
                                 sliderInput("years",
                                             label = h4("3. Välj tidsperiod"),
                                             min = 1998, 
