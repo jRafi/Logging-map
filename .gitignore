@@ -16,6 +16,7 @@
 
 # RStudio files
 .Rproj.user/
+skogskoll.Rproj
 
 # produced vignettes
 vignettes/*.html
@@ -38,6 +39,8 @@ rsconnect/
 
 # Data files
 data/
+temp/
+date.txt
 
 # misc
 misc/
