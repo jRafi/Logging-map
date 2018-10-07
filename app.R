@@ -113,7 +113,7 @@ shinyApp(
                                 fitBounds(10, 69, 24, 55)
                 })
                 
-                
+        
                 observe({
                         selectedYears <- c(input$years[1], input$years[2])
                         leafletProxy("map") %>%
