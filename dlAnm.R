@@ -1,12 +1,6 @@
 library(sf)
 library(dplyr)
 
-if(isTRUE(Sys.info()['sysname'] == "Windows")) {
-        setwd("~/R WD/Git Local/skogskoll")
-} else{
-        setwd("../srv/shiny-server/")
-}
-
 download.file(url = "http://geodpags.skogsstyrelsen.se/geodataport/data/sksAvverkAnm.zip",
               destfile = "temp/anm/anm.zip")
 unzip("temp/anm/anm.zip", exdir = "temp/anm")
@@ -71,4 +65,4 @@ for(i in 2:length(names(municipalities))) {
                          driver = "ESRI Shapefile")
 }
 
-file.remove(dir("temp/anm", full.names = T)[-1])
+file.remove(dir("temp/anm", full.names = T))
