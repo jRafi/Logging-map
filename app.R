@@ -51,7 +51,13 @@ shinyApp(
                                                   label = "Visa utförda avverkningar inom vald tidsperiod"),
                                     checkboxInput(inputId = "bioBox",
                                                   label = "Visa biotopskydd")
-                                ))
+                                ),
+                                box(solidHeader = TRUE,
+                                    width = 9,
+                                    valueBoxOutput("anmBox"),
+                                    valueBoxOutput("utfBox"),
+                                    valueBoxOutput("bioBox"))
+                        )
                 ) 
         ),
         server <- function(input, output, server) {
@@ -167,6 +173,7 @@ shinyApp(
                         if(input$bioBox == TRUE) {
                                 if(dir.exists(paste("data/bio/", input$munies, sep = ""))) {
                                         bioSelected <- bioData()
+                                        print(nrow(bioSelected))
                                         leafletProxy("map", data = bioSelected) %>%
                                                 clearGroup("bio") %>%
                                                 addPolygons(layerId = ~OBJECTID,
@@ -188,6 +195,56 @@ shinyApp(
                         else(leafletProxy("map") %>%
                                      clearGroup("bio"))
                 })
+                
+                ### BOXES
+                
+                output$anmBox <- renderValueBox({
+                        selectedYears <- c(input$years[1], input$years[2])
+                        anmBoxData <- anmData()
+                        anmBoxData <- anmBoxData[anmBoxData$Arendear >= selectedYears[1] & anmBoxData$Arendear <= selectedYears[2],]
+                        if(nrow(anmBoxData) == 1) {
+                                valueBox(paste0(nrow(anmBoxData)),
+                                         "Avverkningsanmälning",
+                                         color = "green",
+                                         width = 3) }
+                        else{
+                                valueBox(paste0(nrow(anmBoxData)),
+                                         "Avverkningsanmälningar",
+                                         color = "green",
+                                         width = 2)
+                        }
+                })
+                
+                output$utfBox <- renderValueBox({
+                        selectedYears <- c(input$years[1], input$years[2])
+                        utfBoxData <- utfData()
+                        utfBoxData <- utfBoxData[utfBoxData$Arendear >= selectedYears[1] & utfBoxData$Arendear <= selectedYears[2],]
+                        if(nrow(utfBoxData) == 1) {
+                                valueBox(paste0(nrow(utfBoxData)),
+                                         "Utförda avverkningar",
+                                         color = "orange",
+                                         width = 2) }
+                        else{
+                                valueBox(paste0(nrow(utfBoxData)),
+                                         "Utförda avverkningar",
+                                         color = "orange",
+                                         width = 2) }
+                })
+                
+                output$bioBox <- renderValueBox({
+                        
+                        if(nrow(bioData()) == 1) {
+                                valueBox(paste0(nrow(bioData())),
+                                         "Biotopskyddsområde",
+                                         color = "purple",
+                                         width = 2) }
+                        else{
+                                valueBox(paste0(nrow(bioData())),
+                                         "Biotopskyddsområden",
+                                         color = "purple", 
+                                         width = 2) }
+                })
+                
                 
         }
 )
