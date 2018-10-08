@@ -65,4 +65,4 @@ for(i in 2:length(names(municipalities))) {
                          driver = "ESRI Shapefile")
 }
 
-file.remove(dir("temp/utf", full.names = T)[-1])
+file.remove("temp/utf/utf.zip")
