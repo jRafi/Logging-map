@@ -118,13 +118,13 @@ shinyApp(
                 ### Data
                 anmData <- eventReactive(c(input$munies, input$latest, input$tabset1), {
                         if(input$tabset1 == "tab2") {
-                                if(dir.exists(paste("data/anm/", input$munies, "/", sep = ""))) {
+                                if(file.exists(paste("data/anm/", input$munies, "/", input$munies, ".shp", sep = ""))) {
                                         read_sf(paste("data/anm/", input$munies, sep = ""))
                                 }
                                 else{NULL}
                         }
                         else{
-                                if(dir.exists(paste("data/anm/", input$latest, "/", sep = ""))) {
+                                if(file.exists(paste("data/anm/", input$munies, "/", input$munies, ".shp", sep = ""))) {
                                         read_sf(paste("data/anm/", input$latest, sep = ""))
                                 }
                                 else{NULL} 
@@ -135,13 +135,13 @@ shinyApp(
                 
                 utfData <- eventReactive(c(input$munies, input$latest, input$tabset1), {
                         if(input$tabset1 == "tab2") {
-                                if(dir.exists(paste("data/utf/", input$munies, "/", sep = ""))) {
+                                if(file.exists(paste("data/utf/", input$munies, "/", input$munies, ".shp", sep = ""))) {
                                         read_sf(paste("data/utf/", input$munies, sep = ""))
                                 }
                                 else{NULL}
                         }
                         else{
-                                if(dir.exists(paste("data/utf/", input$latest, "/", sep = ""))) {
+                                if(file.exists(paste("data/utf/", input$latest, "/", input$latest, ".shp", sep = ""))) {
                                         read_sf(paste("data/utf/", input$latest, sep = ""))
                                 }
                                 else{NULL} 
@@ -151,13 +151,13 @@ shinyApp(
                 
                 bioData <- eventReactive(c(input$munies, input$latest, input$tabset1), {
                         if(input$tabset1 == "tab2") {
-                                if(dir.exists(paste("data/bio/", input$munies, "/", sep = ""))) {
+                                if(file.exists(paste("data/bio/", input$munies, "/", input$munies, ".shp", sep = ""))) {
                                         read_sf(paste("data/bio/", input$munies, sep = ""))
                                 }
                                 else{NULL}
                         }
                         else{
-                                if(dir.exists(paste("data/bio/", gsub("Senaste_", "", input$latest), "/", sep = ""))) {
+                                if(file.exists(paste("data/bio/", gsub("Senaste_", "", input$latest), "/", input$latest, ".shp", sep = ""))) {
                                         read_sf(paste("data/bio/", gsub("Senaste_", "", input$latest), sep = ""))
                                 }
                                 else{NULL} 
