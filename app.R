@@ -124,7 +124,7 @@ shinyApp(
                                 else{NULL}
                         }
                         else{
-                                if(file.exists(paste("data/anm/", input$munies, "/", input$munies, ".shp", sep = ""))) {
+                                if(file.exists(paste("data/anm/", input$latest, "/", input$latest, ".shp", sep = ""))) {
                                         read_sf(paste("data/anm/", input$latest, sep = ""))
                                 }
                                 else{NULL} 
@@ -157,7 +157,7 @@ shinyApp(
                                 else{NULL}
                         }
                         else{
-                                if(file.exists(paste("data/bio/", gsub("Senaste_", "", input$latest), "/", input$latest, ".shp", sep = ""))) {
+                                if(file.exists(paste("data/bio/", gsub("Senaste_", "", input$latest), "/", gsub("Senaste_", "", input$latest), ".shp", sep = ""))) {
                                         read_sf(paste("data/bio/", gsub("Senaste_", "", input$latest), sep = ""))
                                 }
                                 else{NULL} 
