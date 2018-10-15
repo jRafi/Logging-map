@@ -134,40 +134,34 @@ shinyApp(
                                         read_sf(paste("data/anm/", input$munies, sep = ""))
                                 } else{NULL} 
                         }
-                }
-                )
+                })
                 
                 
                 utfData <- eventReactive(c(input$munies, input$latest, input$tabset1), {
-                        if(input$tabset1 == "tab2") {
-                                if(file.exists(paste("data/utf/", input$munies, "/", input$munies, ".shp", sep = ""))) {
-                                        read_sf(paste("data/utf/", input$munies, sep = ""))
-                                }
-                                else{NULL}
-                        }
-                        else{
-                                if(file.exists(paste("data/utf/", input$latest, "/", input$latest, ".shp", sep = ""))) {
+                        if(input$tabset1 == "tab1" && input$latest != "") {
+                                if(dir.exists(paste("data/utf/", input$latest, "/", sep = ""))) {
                                         read_sf(paste("data/utf/", input$latest, sep = ""))
-                                }
-                                else{NULL} 
+                                } else{NULL} 
+                        } else if(input$tabset1 == "tab2" && input$munies != "") {
+                                if(dir.exists(paste("data/utf/", input$munies, "/", sep = ""))) {
+                                        read_sf(paste("data/utf/", input$munies, sep = ""))
+                                } else{NULL} 
                         }
                 })
                 
                 
                 bioData <- eventReactive(c(input$munies, input$latest, input$tabset1), {
-                        if(input$tabset1 == "tab2") {
-                                if(file.exists(paste("data/bio/", input$munies, "/", input$munies, ".shp", sep = ""))) {
-                                        read_sf(paste("data/bio/", input$munies, sep = ""))
-                                }
-                                else{NULL}
-                        }
-                        else{
-                                if(file.exists(paste("data/bio/", gsub("Senaste_", "", input$latest), "/", gsub("Senaste_", "", input$latest), ".shp", sep = ""))) {
+                        if(input$tabset1 == "tab1" && input$latest != "") {
+                                if(dir.exists(paste("data/bio/", gsub("Senaste_", "", input$latest)))) {
                                         read_sf(paste("data/bio/", gsub("Senaste_", "", input$latest), sep = ""))
-                                }
-                                else{NULL} 
+                                } else{NULL} 
+                        } else if(input$tabset1 == "tab2" && input$munies != "") {
+                                if(dir.exists(paste("data/bio/", input$munies, "/", sep = ""))) {
+                                        read_sf(paste("data/bio/", input$munies, sep = ""))
+                                } else{NULL} 
                         }
                 })
+                
                 
                 ### Leaflet
                 output$map <- renderLeaflet({
