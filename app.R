@@ -93,10 +93,10 @@ shinyApp(
         server <- function(input, output, server, session) {
                 
                 #observeEvent(input$goButton, {
-                #        print(anmData())
-                #        print(nchar(anmData()))
-                #        print(length(anmData()))
-                #        print(!is.null(anmData()))
+                #        print(input$latest)
+                #        print(nchar(input$latest))
+                #        print(length(input$latest))
+                #        print(!is.null(input$latest))
                 #})
                 
                 ### UI
@@ -125,11 +125,11 @@ shinyApp(
                 
                 ### Data
                 anmData <- eventReactive(c(input$munies, input$latest, input$tabset1), {
-                        if(input$tabset1 == "tab1" && !is.null(anmData())) {
+                        if(input$tabset1 == "tab1" && input$latest != "") {
                                 if(dir.exists(paste("data/anm/", input$latest, "/", sep = ""))) {
                                         read_sf(paste("data/anm/", input$latest, sep = ""))
                                 } else{NULL} 
-                        } else if(input$tabset1 == "tab2" && !is.null(anmData())) {
+                        } else if(input$tabset1 == "tab2" && input$munies != "") {
                                 if(dir.exists(paste("data/anm/", input$munies, "/", sep = ""))) {
                                         read_sf(paste("data/anm/", input$munies, sep = ""))
                                 } else{NULL} 
