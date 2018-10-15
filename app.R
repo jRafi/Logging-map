@@ -230,10 +230,7 @@ shinyApp(
                 observe({
                         bioSelected <- bioData()
                         
-                        if(input$bioBox == TRUE) {
-                                if(dir.exists(paste("data/bio/", input$munies, "/", sep = ""))) {
-                                        bioSelected <- bioData()
-                                        print(nrow(bioSelected))
+                        if(input$bioBox == TRUE && !is.null(bioSelected)) {
                                         leafletProxy("map", data = bioSelected) %>%
                                                 clearGroup("bio") %>%
                                                 addPolygons(layerId = ~OBJECTID,
@@ -251,7 +248,6 @@ shinyApp(
                                                             )
                                                             ))
                                 }
-                        }
                         else(leafletProxy("map") %>%
                                      clearGroup("bio"))
                 })
