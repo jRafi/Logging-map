@@ -39,6 +39,7 @@ shinyApp(
                                               id = "tabset1",
                                               tabPanel("Senast inkommet",
                                                        value = "tab1",
+                                                       #actionButton("goButton", "Go!"),
                                                        selectizeInput("latest",
                                                                       label = "",
                                                                       choices = NULL,
@@ -91,6 +92,13 @@ shinyApp(
         ),
         server <- function(input, output, server, session) {
                 
+                #observeEvent(input$goButton, {
+                #        print(anmData())
+                #        print(nchar(anmData()))
+                #        print(length(anmData()))
+                #        print(!is.null(anmData()))
+                #})
+                
                 ### UI
                 observe({
                         updateSelectizeInput(session, 'munies',
@@ -117,20 +125,17 @@ shinyApp(
                 
                 ### Data
                 anmData <- eventReactive(c(input$munies, input$latest, input$tabset1), {
-                        if(input$tabset1 == "tab2") {
-                                if(file.exists(paste("data/anm/", input$munies, "/", input$munies, ".shp", sep = "")) && nchar(input$latest) >= 2) {
-                                        read_sf(paste("data/anm/", input$munies, sep = ""))
-                                }
-                                else{NULL}
-                        }
-                        else{
-                                if(file.exists(paste("data/anm/", input$latest, "/", input$latest, ".shp", sep = "")) && nchar(input$latest) >= 2) {
+                        if(input$tabset1 == "tab1" && !is.null(input$latest)) {
+                                if(dir.exists(paste("data/anm/", input$latest, "/", sep = ""))) {
                                         read_sf(paste("data/anm/", input$latest, sep = ""))
-                                }
-                                else{NULL} 
+                                } else{NULL} 
+                        } else if(input$tabset1 == "tab2" && !is.null(input$munies)) {
+                                if(dir.exists(paste("data/anm/", input$munies, "/", sep = ""))) {
+                                        read_sf(paste("data/anm/", input$munies, sep = ""))
+                                } else{NULL} 
                         }
-                })
-                
+                }
+                )
                 
                 
                 utfData <- eventReactive(c(input$munies, input$latest, input$tabset1), {
