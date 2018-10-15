@@ -125,11 +125,11 @@ shinyApp(
                 
                 ### Data
                 anmData <- eventReactive(c(input$munies, input$latest, input$tabset1), {
-                        if(input$tabset1 == "tab1" && !is.null(input$latest)) {
+                        if(input$tabset1 == "tab1" && !is.null(anmData())) {
                                 if(dir.exists(paste("data/anm/", input$latest, "/", sep = ""))) {
                                         read_sf(paste("data/anm/", input$latest, sep = ""))
                                 } else{NULL} 
-                        } else if(input$tabset1 == "tab2" && !is.null(input$munies)) {
+                        } else if(input$tabset1 == "tab2" && !is.null(anmData())) {
                                 if(dir.exists(paste("data/anm/", input$munies, "/", sep = ""))) {
                                         read_sf(paste("data/anm/", input$munies, sep = ""))
                                 } else{NULL} 
