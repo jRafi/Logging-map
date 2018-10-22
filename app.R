@@ -32,9 +32,9 @@ shinyApp(
                                                   }
                                                   "))),
                         fluidRow(
-                                column(width = 3,
+                                column(width = 4,
                                        tabBox(width = NULL,
-                                              height = "200px",
+                                              height = "210px",
                                               title = "",
                                               id = "tabset1",
                                               tabPanel("Senast inkommet",
@@ -45,14 +45,13 @@ shinyApp(
                                                                       choices = NULL,
                                                                       selected = NULL,
                                                                       options = list(placeholder = 'Välj län'))),
-                                              tabPanel("Historisk data",
+                                              tabPanel("Sök historisk data",
                                                        value = "tab2",
                                                        selectizeInput("munies",
                                                                       label = "",
                                                                       choices = NULL,
                                                                       selected = NULL,
                                                                       options = list(placeholder = 'Sök kommun...')),
-                                                       uiOutput("ui_muni"),
                                                        sliderInput("years",
                                                                    label = "",
                                                                    min = 1998, 
@@ -83,7 +82,7 @@ shinyApp(
                                                          label = "Visa biotopskydd"))),
                                 
                                 box(solidHeader = TRUE,
-                                    width = 7,
+                                    width = 8,
                                     leafletOutput(outputId = "map"))
                                 
                                 
@@ -92,14 +91,6 @@ shinyApp(
         ),
         server <- function(input, output, server, session) {
                 
-                #observeEvent(input$goButton, {
-                #        print(input$latest)
-                #        print(nchar(input$latest))
-                #        print(length(input$latest))
-                #        print(!is.null(input$latest))
-                #})
-                
-                ### UI
                 observe({
                         updateSelectizeInput(session, 'munies',
                                              choices = municipalities,
@@ -112,18 +103,6 @@ shinyApp(
                                              server = TRUE)
                 })
                 
-                output$tabset1Selected <- renderText({
-                        input$tabset1
-                })
-                
-                #output$ui_muni <- renderUI({
-                #       selectInput("munies",
-                #                   label = input$tabset1Selected,
-                #                   choices = municipalities[[input$county]],
-                #                    selected = "Inget")
-                #})
-                
-                ### Data
                 anmData <- eventReactive(c(input$munies, input$latest, input$tabset1), {
                         if(input$tabset1 == "tab1" && input$latest != "") {
                                 if(dir.exists(paste("data/anm/", input$latest, "/", sep = ""))) {
@@ -149,7 +128,6 @@ shinyApp(
                         }
                 })
                 
-                
                 bioData <- eventReactive(c(input$munies, input$latest, input$tabset1), {
                         if(input$tabset1 == "tab1" && input$latest != "") {
                                 if(dir.exists(paste("data/bio/", gsub("Senaste_", "", input$latest)))) {
@@ -162,8 +140,7 @@ shinyApp(
                         }
                 })
                 
-                
-                ### Leaflet
+
                 output$map <- renderLeaflet({
                         leaflet() %>% 
                                 addProviderTiles("CartoDB.Positron") %>%
@@ -186,15 +163,13 @@ shinyApp(
                                         addPolygons(layerId = ~OBJECTID,
                                                     color = "forestgreen",
                                                     group = "anm",
-                                                    popup = as.character(tagList(
-                                                            tags$strong("Inkomstdatum:"), filteredAnmData$Inkomdatum, tags$br(),
-                                                            tags$strong("Skogstyp:"), filteredAnmData$Skogstyp, tags$br(),
-                                                            tags$strong("Avverkningstyp:"), filteredAnmData$Avverktyp, tags$br(),
-                                                            tags$strong("Anmäld HA:"), filteredAnmData$Anmaldha, tags$br(),
-                                                            tags$strong("Skogsodlha:"), filteredAnmData$Skogsodlha, tags$br(),
-                                                            tags$strong("Natforha:"), filteredAnmData$Natforha, tags$br(),
-                                                            tags$strong("Avvha:"), filteredAnmData$Avvha, tags$br()
-                                                    )
+                                                    popup = paste("<b>Inkomstdatum:</b>", filteredAnmData$Inkomdatum, tags$br(),
+                                                                  "<b>Skogstyp:</b>", filteredAnmData$Skogstyp, tags$br(),
+                                                                  "<b>Avverkningstyp:</b>", filteredAnmData$Avverktyp, tags$br(),
+                                                                  "<b>Anmäld HA:</b>", filteredAnmData$Anmaldha, tags$br(),
+                                                                  "<b>Skogsodlha:</b>", filteredAnmData$Skogsodlha, tags$br(),
+                                                                  "<b>Natforha:</b>", filteredAnmData$Natforha, tags$br(),
+                                                                  "<b>Avvha:</b>", filteredAnmData$Avvha, tags$br()
                                                     ))
                         }
                         else(leafletProxy("map") %>%
@@ -212,15 +187,13 @@ shinyApp(
                                         addPolygons(layerId = ~OBJECTID,
                                                     color = "darkorange",
                                                     group = "utf",
-                                                    popup = as.character(tagList(
-                                                            tags$strong("Avverkningsdatum:"), filteredUtfData$Avvdatum, tags$br(),
-                                                            tags$strong("Skogstyp:"), filteredUtfData$Skogstyp, tags$br(),
-                                                            tags$strong("Avverkningstyp:"), filteredUtfData$Avverktyp, tags$br(),
-                                                            tags$strong("Anmäld HA:"), filteredUtfData$AnmaldHa, tags$br(),
-                                                            tags$strong("Skogsodlha:"), filteredUtfData$SkogsodlHa, tags$br(),
-                                                            tags$strong("Natforha:"), filteredUtfData$Natforha, tags$br(),
-                                                            tags$strong("Arealha:"), filteredUtfData$Arealha, tags$br()
-                                                    )
+                                                    popup = paste("<b>Avverkningsdatum:</b>", filteredUtfData$Avvdatum, tags$br(),
+                                                                  "<b>Skogstyp:</b>", filteredUtfData$Skogstyp, tags$br(),
+                                                                  "<b>Avverkningstyp:</b>", filteredUtfData$Avverktyp, tags$br(),
+                                                                  "<b>Anmäld avverkningsyta:</b>", filteredUtfData$AnmaldHa, tags$br(),
+                                                                  "<b>Skogsodlha:</b>", filteredUtfData$SkogsodlHa, tags$br(),
+                                                                  "<b>Natforha:</b>", filteredUtfData$Natforha, tags$br(),
+                                                                  "<b>Arealha:</b>", filteredUtfData$Arealha, tags$br()
                                                     ))
                         }
                         else(leafletProxy("map") %>%
@@ -231,92 +204,24 @@ shinyApp(
                         bioSelected <- bioData()
                         
                         if(input$bioBox == TRUE && !is.null(bioSelected)) {
-                                        leafletProxy("map", data = bioSelected) %>%
-                                                clearGroup("bio") %>%
-                                                addPolygons(layerId = ~OBJECTID,
-                                                            color = "purple",
-                                                            group = "bio",
-                                                            popup = as.character(tagList(
-                                                                    tags$strong("Biotopskydd"), tags$br(),
-                                                                    tags$strong("Biotopkategori:"), bioSelected$Biotyp, tags$br(),
-                                                                    tags$strong("Skogstyp:"), bioSelected$Naturtyp, tags$br(),
-                                                                    tags$strong("Beslutsdatum:"), bioSelected$Datbeslut, tags$br(),
-                                                                    tags$strong("Produktiv skogsmark (ha):"), bioSelected$Areaprod, tags$br(),
-                                                                    tags$strong("Total areal (ha):"), bioSelected$Areato, tags$br(),
-                                                                    tags$strong("Standort:"), bioSelected$Standort, tags$br(),
-                                                                    tags$strong("Url:"), tags$a(href=bioSelected$Url, bioSelected$Url)
-                                                            )
-                                                            ))
-                                }
+                                leafletProxy("map", data = bioSelected) %>%
+                                        clearGroup("bio") %>%
+                                        addPolygons(layerId = ~OBJECTID,
+                                                    color = "purple",
+                                                    group = "bio",
+                                                    popup = paste("<b>Biotopkategori:</b>", bioSelected$Biotyp, tags$br(),
+                                                                  "<b>Skogstyp:</b>", bioSelected$Naturtyp, tags$br(),
+                                                                  "<b>Beslutsdatum:</b>", bioSelected$Datbeslut, tags$br(),
+                                                                  "<b>Produktiv skogsmark (ha):</b>", bioSelected$Areaprod, tags$br(),
+                                                                  "<b>Total areal (ha):</b>", bioSelected$Areato, tags$br(),
+                                                                  "<b>Standort:</b>", bioSelected$Standort, tags$br(),
+                                                                  "<b>Url:</b>", bioSelected$Url, tags$br(),
+                                                                  "<b>Biotopkategori:</b>", bioSelected$Biotyp, tags$br())
+                                                    )
+                        }
                         else(leafletProxy("map") %>%
                                      clearGroup("bio"))
                 })
-                
-                ### BOXES
-                
-                output$anmBox <- renderValueBox({
-                        selectedYears <- c(input$years[1], input$years[2])
-                        anmBoxData <- anmData()
-                        anmBoxData <- anmBoxData[anmBoxData$Arendear >= selectedYears[1] & anmBoxData$Arendear <= selectedYears[2],]
-                        if(is.null(anmBoxData)) {
-                                valueBox(paste0("0"),
-                                         "Avverkningsanmälningar",
-                                         color = "green",
-                                         width = 3) }
-                        else if(nrow(anmBoxData) == 1) {
-                                valueBox(paste0(nrow(utfBoxData)),
-                                         "Avverkningsanmälningar",
-                                         color = "green",
-                                         width = 3) }
-                        else{
-                                valueBox(paste0(nrow(anmBoxData)),
-                                         "Avverkningsanmälningar",
-                                         color = "green",
-                                         width = 3)
-                        }
-                })
-                
-                output$utfBox <- renderValueBox({
-                        selectedYears <- c(input$years[1], input$years[2])
-                        utfBoxData <- utfData()
-                        utfBoxData <- utfBoxData[utfBoxData$Arendear >= selectedYears[1] & utfBoxData$Arendear <= selectedYears[2],]
-                        if(is.null(utfBoxData)) {
-                                valueBox(paste0("0"),
-                                         "Utförda avverkningar",
-                                         color = "orange",
-                                         width = 3) }
-                        else if(nrow(utfBoxData) == 1) {
-                                valueBox(paste0(nrow(utfBoxData)),
-                                         "Utförda avverkningar",
-                                         color = "orange",
-                                         width = 3) }
-                        else{
-                                valueBox(paste0(nrow(utfBoxData)),
-                                         "Utförda avverkningar",
-                                         color = "orange",
-                                         width = 3) }
-                })
-                
-                output$bioBox <- renderValueBox({
-                        if(is.null(bioData())) {
-                                valueBox(paste0("0"),
-                                         "Biotopskyddsområden",
-                                         color = "purple",
-                                         width = 3)
-                        }
-                        else if(nrow(bioData()) == 1) {
-                                valueBox(paste0(nrow(bioData())),
-                                         "Biotopskyddsområde",
-                                         color = "purple",
-                                         width = 3)
-                        }
-                        else{
-                                valueBox(paste0(nrow(bioData())),
-                                         "Biotopskyddsområden",
-                                         color = "purple", 
-                                         width = 3) }
-                })
-                
                 
         }
 )

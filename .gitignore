@@ -40,7 +40,7 @@ rsconnect/
 # Data files
 data/
 temp/
-date.txt
+date*
 
 # misc
 misc/
