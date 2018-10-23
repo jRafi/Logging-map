@@ -69,4 +69,16 @@ for(i in 2:length(names(municipalities))) {
                          driver = "ESRI Shapefile")
 }
 
-file.remove(dir("temp/bio", full.names = T)[-1])
+bio <- filter(bio, Datbeslut >= Sys.Date()-15)
+
+file.remove(dir("data/bio/Senaste_Hela Sverige", full.names = T))
+write_sf(obj = bio,
+         dsn = "data/bio/Senaste_Hela Sverige",
+         layer = "Senaste_Hela Sverige",
+         driver = "ESRI Shapefile")
+
+file.remove("temp/bio/bio.zip")
+
+date <- file.info("temp/bio/sksBiotopskydd.shp")['mtime']
+date <- as.Date(date$mtime)
+saveRDS(date, "dateBio.rds")

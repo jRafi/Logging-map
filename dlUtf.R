@@ -44,6 +44,9 @@ utf <- st_transform(utf, crs = "+proj=longlat +datum=WGS84")
 
 utf$Lan <- gsub("s län", "", utf$Lan)
 
+utfTable <- utf %>% st_set_geometry(NULL)
+saveRDS(utfTable, "data/tables/utfTable.rds")
+
 kommunlista <- sort(unique(utf$Kommun))
 for(i in 1:length(kommunlista)) {
         file.remove(dir(paste("data/utf/", kommunlista[i], sep=""), full.names = T))
@@ -65,4 +68,16 @@ for(i in 2:length(names(municipalities))) {
                          driver = "ESRI Shapefile")
 }
 
+utf <- filter(utf, Inkomdatum >= Sys.Date()-15)
+
+file.remove(dir("data/utf/Senaste_Hela Sverige", full.names = T))
+write_sf(obj = utf,
+         dsn = "data/utf/Senaste_Hela Sverige",
+         layer = "Senaste_Hela Sverige",
+         driver = "ESRI Shapefile")
+
 file.remove("temp/utf/utf.zip")
+
+date <- file.info("temp/utf/sksUtfordAvverk.shp")['mtime']
+date <- as.Date(date$mtime)
+saveRDS(date, "dateUtf.rds")

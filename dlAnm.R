@@ -44,6 +44,9 @@ anm <- st_transform(anm, crs = "+proj=longlat +datum=WGS84")
 
 anm$Lan <- gsub("s län", "", anm$Lan)
 
+anmTable <- anm %>% st_set_geometry(NULL)
+saveRDS(anmTable, "data/tables/anmTable.rds")
+
 kommunlista <- sort(unique(anm$Kommun))
 for(i in 1:length(kommunlista)) {
         file.remove(dir(paste("data/anm/", kommunlista[i], sep=""), full.names = T))
@@ -65,4 +68,16 @@ for(i in 2:length(names(municipalities))) {
                          driver = "ESRI Shapefile")
 }
 
+anm <- filter(anm, Inkomdatum >= Sys.Date()-15)
+
+file.remove(dir("data/anm/Senaste_Hela Sverige", full.names = T))
+write_sf(obj = anm,
+        dsn = "data/anm/Senaste_Hela Sverige",
+        layer = "Senaste_Hela Sverige",
+        driver = "ESRI Shapefile")
+
 file.remove("temp/anm/anm.zip")
+
+date <- file.info("temp/anm/sksAvverkAnm.shp")['mtime']
+date <- as.Date(date$mtime)
+saveRDS(date, "dateAnm.rds")
