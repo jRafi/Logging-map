@@ -56,7 +56,7 @@ for(i in 1:length(kommunlista)) {
                          driver = "ESRI Shapefile")
 }
 
-municipalities <- readRDS("municipalities.rds")
+municipalities <- readRDS("municipalitiesList.rds")
 
 anm <- filter(anm, Inkomdatum >= Sys.Date()-60)
 

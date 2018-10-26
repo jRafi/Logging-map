@@ -65,24 +65,11 @@ shinyApp(
                                               #uiOutput("ui_muni"),
                                               #uiOutput("ui_years"))
                                        ),
-                                       
-                                       #box(solidHeader = TRUE,
-                                       #    width = 3,
-                                       #    valueBoxOutput("anmBox"),
-                                       #    valueBoxOutput("utfBox"),
-                                       #    valueBoxOutput("bioBox")
-                                       box(solidHeader = TRUE,
-                                           width = NULL,
-                                           checkboxInput(inputId = "anmBox",
-                                                         label = "Visa avverkningsanmälningar inom vald tidsperiod",
-                                                         value = T),
-                                           checkboxInput(inputId = "utfBox",
-                                                         label = "Visa utförda avverkningar inom vald tidsperiod"),
-                                           checkboxInput(inputId = "bioBox",
-                                                         label = "Visa biotopskydd"))),
+                                       uiOutput("boxes")),
                                 
                                 box(solidHeader = TRUE,
                                     width = 8,
+                                    textOutput("currCho"),
                                     leafletOutput(outputId = "map"))
                                 
                                 
@@ -102,6 +89,31 @@ shinyApp(
                                              choices = senaste,
                                              server = TRUE)
                 })
+                
+                currentChoice <- eventReactive(c(input$munies, input$latest, input$tabset1), {
+                        if(input$tabset1 == "tab1") {
+                                input$latest
+                        } else if(input$tabset1 == "tab2") {
+                                input$munies
+                        }
+                })
+                
+                output$currCho <- renderText(c(currentChoice(), currentChoice()))
+                
+                output$boxes <- renderUI(
+                        
+                        if(!is.null(anmData() == TRUE)){
+                        box(solidHeader = TRUE,
+                            width = NULL,
+                            checkboxInput(inputId = "anmBox",
+                                          label = "Visa avverkningsanmälningar inom vald tidsperiod",
+                                          value = T),
+                            checkboxInput(inputId = "utfBox",
+                                          label = "Visa utförda avverkningar inom vald tidsperiod"),
+                            checkboxInput(inputId = "bioBox",
+                                          label = "Visa biotopskydd"))
+                                }
+                )
                 
                 anmData <- eventReactive(c(input$munies, input$latest, input$tabset1), {
                         if(input$tabset1 == "tab1" && input$latest != "") {
