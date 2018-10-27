@@ -102,14 +102,18 @@ shinyApp(
                 
                 currentChoice <- eventReactive(c(input$munies, input$latest, input$tabset1, input$years), {
                         if(input$tabset1 == "tab1") {
-                                c(gsub("Senaste_", "", input$latest), nrow(anmData()))
+                                
+                                c(gsub("Senaste_", "", input$latest),
+                                  nrow(anmData()),
+                                  if(input$latest == "Senaste_Hela Sverige"){15}
+                                  else(60))
                         } else if(input$tabset1 == "tab2") {
                                 c(input$munies, nrow(anmData()[anmData()$Arendear >= input$years[1] & anmData()$Arendear <= input$years[2],]))
                         }
                 })
                 
                 output$currCho <- renderText(
-                        if(currentChoice()[1] != "") {paste(currentChoice()[1], ": ", currentChoice()[2], " avverkningsanmälningar.", sep = "")}
+                        if(currentChoice()[1] != "") {paste(currentChoice()[1], ": ", currentChoice()[2], " avverkningsanmälningar inkomna de senaste ", currentChoice()[3], " dagarna.", sep = "")}
                         else("")
 )
                 
