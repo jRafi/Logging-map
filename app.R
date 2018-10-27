@@ -22,6 +22,7 @@ shinyApp(
                 dashboardSidebar(disable = TRUE
                 ),
                 dashboardBody(
+                        
                         tags$head(includeScript("gtag.js"),
                                   tags$style(HTML("
                                                 .main-header .logo {
@@ -65,7 +66,16 @@ shinyApp(
                                               #uiOutput("ui_muni"),
                                               #uiOutput("ui_years"))
                                        ),
-                                       uiOutput("boxes")),
+                                       box(solidHeader = TRUE,
+                                           width = NULL,
+                                           checkboxInput(inputId = "anmBox",
+                                                         label = "Visa avverkningsanmälningar inom vald tidsperiod",
+                                                         value = T),
+                                           checkboxInput(inputId = "utfBox",
+                                                         label = "Visa utförda avverkningar inom vald tidsperiod"),
+                                           checkboxInput(inputId = "bioBox",
+                                                         label = "Visa biotopskydd"))
+                                       ),
                                 
                                 box(solidHeader = TRUE,
                                     width = 8,
@@ -90,34 +100,37 @@ shinyApp(
                                              server = TRUE)
                 })
                 
-                currentChoice <- eventReactive(c(input$munies, input$latest, input$tabset1), {
+                currentChoice <- eventReactive(c(input$munies, input$latest, input$tabset1, input$years), {
                         if(input$tabset1 == "tab1") {
-                                input$latest
+                                c(gsub("Senaste_", "", input$latest), nrow(anmData()))
                         } else if(input$tabset1 == "tab2") {
-                                input$munies
+                                c(input$munies, nrow(anmData()[anmData()$Arendear >= input$years[1] & anmData()$Arendear <= input$years[2],]))
                         }
                 })
                 
-                output$currCho <- renderText(c(currentChoice(), currentChoice()))
+                output$currCho <- renderText(
+                        if(currentChoice()[1] != "") {paste(currentChoice()[1], ": ", currentChoice()[2], " avverkningsanmälningar.", sep = "")}
+                        else("")
+)
                 
-                output$boxes <- renderUI(
-                        
-                        if(!is.null(anmData() == TRUE)){
-                        box(solidHeader = TRUE,
-                            width = NULL,
-                            checkboxInput(inputId = "anmBox",
-                                          label = "Visa avverkningsanmälningar inom vald tidsperiod",
-                                          value = T),
-                            checkboxInput(inputId = "utfBox",
-                                          label = "Visa utförda avverkningar inom vald tidsperiod"),
-                            checkboxInput(inputId = "bioBox",
-                                          label = "Visa biotopskydd"))
-                                }
-                )
+                #output$boxes <- renderUI(
+                #        if(!is.null(anmData() == TRUE)){
+                #        box(solidHeader = TRUE,
+                #            width = NULL,
+                #            checkboxInput(inputId = "anmBox",
+                #                          label = "Visa avverkningsanmälningar inom vald tidsperiod",
+                #                          value = T),
+                #            checkboxInput(inputId = "utfBox",
+                #                          label = "Visa utförda avverkningar inom vald tidsperiod"),
+                #            checkboxInput(inputId = "bioBox",
+                #                          label = "Visa biotopskydd"))
+                #        }
+                #)
                 
                 anmData <- eventReactive(c(input$munies, input$latest, input$tabset1), {
                         if(input$tabset1 == "tab1" && input$latest != "") {
                                 if(dir.exists(paste("data/anm/", input$latest, "/", sep = ""))) {
+                                        
                                         read_sf(paste("data/anm/", input$latest, sep = ""))
                                 } else{NULL} 
                         } else if(input$tabset1 == "tab2" && input$munies != "") {
@@ -161,16 +174,19 @@ shinyApp(
                 
                 
                 observe({
+                        
                         selectedYears <- c(input$years[1], input$years[2])
                         leafletProxy("map") %>%
                                 clearGroup("anm") %>%
                                 clearGroup("utf")
                         
                         if(input$anmBox == TRUE && !is.null(anmData())) {
+
                                 filteredAnmData <- anmData()
                                 if(input$tabset1 == "tab2") {
                                         filteredAnmData <- filteredAnmData[filteredAnmData$Arendear >= selectedYears[1] & filteredAnmData$Arendear <= selectedYears[2],]
                                 }
+                                
                                 leafletProxy("map", data = filteredAnmData) %>%
                                         addPolygons(layerId = ~OBJECTID,
                                                     color = "forestgreen",
@@ -183,6 +199,7 @@ shinyApp(
                                                                   "<b>Natforha:</b>", filteredAnmData$Natforha, tags$br(),
                                                                   "<b>Avvha:</b>", filteredAnmData$Avvha, tags$br()
                                                     ))
+
                         }
                         else(leafletProxy("map") %>%
                                      clearGroup("anm"))
