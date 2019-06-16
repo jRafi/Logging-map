@@ -12,6 +12,8 @@ if(isTRUE(Sys.info()['sysname'] == "Windows")) {
 }
 
 anm <- select(anm, -Lannr, -Kommunnr)
+anm$Lan <- stringr::str_to_title(anm$Lan)
+anm$Kommun <- stringr::str_to_title(anm$Kommun)
 
 if(isTRUE(Sys.info()['sysname'] == "Windows")) {
         replaceMisencodings <- function(x) {
@@ -41,8 +43,7 @@ anm$Kommun <- replaceMisencodings(anm$Kommun)
 anm$Skogstyp <- replaceMisencodings(anm$Skogstyp)
 anm <- st_transform(anm, crs = "+proj=longlat +datum=WGS84")
 
-anm$Lan <- gsub("s län", "", anm$Lan)
-anm$Lan <- gsub("S LÄN", "", anm$Lan)
+anm$Lan <- gsub("s Län", "", anm$Lan)
 
 anmTable <- anm %>% st_set_geometry(NULL)
 saveRDS(anmTable, "data/tables/anmTable.rds")

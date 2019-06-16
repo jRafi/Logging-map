@@ -12,10 +12,11 @@ if(isTRUE(Sys.info()['sysname'] == "Windows")) {
 }
 
 utf <- select(utf, -Lannr, -Kommunnr)
+utf$Lan <- stringr::str_to_title(utf$Lan)
+utf$Kommun <- stringr::str_to_title(utf$Kommun)
 
 if(isTRUE(Sys.info()['sysname'] == "Windows")) {
         replaceMisencodings <- function(x) {
-                Encoding(x) <- "latin1"
                 x <- gsub("Â„", "ä", x)
                 x <- gsub("Â”", "ö", x)
                 x <- gsub("ÂŽ", "Ä", x)
@@ -42,7 +43,7 @@ utf$Kommun <- replaceMisencodings(utf$Kommun)
 utf$Skogstyp <- replaceMisencodings(utf$Skogstyp)
 utf <- st_transform(utf, crs = "+proj=longlat +datum=WGS84")
 
-utf$Lan <- gsub("s län", "", utf$Lan)
+utf$Lan <- gsub("s Län", "", utf$Lan)
 
 utfTable <- utf %>% st_set_geometry(NULL)
 saveRDS(utfTable, "data/tables/utfTable.rds")
@@ -56,7 +57,7 @@ for(i in 1:length(kommunlista)) {
                          driver = "ESRI Shapefile")
 }
 
-municipalities <- readRDS("municipalities.rds")
+municipalities <- readRDS("municipalitiesList.rds")
 
 utf <- filter(utf, Avvdatum >= Sys.Date()-60)
 
